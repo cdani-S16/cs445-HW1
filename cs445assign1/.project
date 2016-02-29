@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<projectDescription>
+	<name>cs445assign1</name>
+	<comment></comment>
+	<projects>
+	</projects>
+	<buildSpec>
+		<buildCommand>
+			<name>org.eclipse.jdt.core.javabuilder</name>
+			<arguments>
+			</arguments>
+		</buildCommand>
+	</buildSpec>
+	<natures>
+		<nature>org.eclipse.jdt.core.javanature</nature>
+	</natures>
+	<linkedResources>
+		<link>
+			<name>bin</name>
+			<type>2</type>
+			<location>/home/chris/workspace/testProjv3/bin</location>
+		</link>
+		<link>
+			<name>src</name>
+			<type>2</type>
+			<location>/home/chris/workspace/cs445assign1/src/cs445assign1</location>
+		</link>
+	</linkedResources>
+</projectDescription>

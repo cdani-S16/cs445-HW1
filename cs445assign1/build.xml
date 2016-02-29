@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--project default="run" name="CS 445 Assignment 1"-->
+
+<!--target name="run" depends="compile">
+		<java classname="cs445assign1.TestCreature">
+			<classpath path="classes"/>
+		</java>
+	</target>
+	<target name="compile">
+		<javac includeantruntime="false" srcdir="./src" destdir="classes"/>
+	</target-->
+
+<!-- directory that contains emma.jar and emma_ant.jar: -->
+
+<project name="EMMA demo (on-the-fly mode)" default="run" basedir=".">
+
+	<!-- the default target compiles and runs Main: -->
+	<target name="all" depends="compile, run" />
+
+
+	<!-- root directory for the example source code: -->
+	<property name="src.dir" value="${basedir}/src" />
+
+	<!-- javac class output directory: -->
+	<property name="out.dir" value="${basedir}/out" />
+
+	<!-- output directory used for EMMA coverage reports: -->
+	<property name="coverage.dir" value="${basedir}/coverage" />
+
+	<!-- directory that contains emma.jar and emma_ant.jar: -->
+	<property name="emma.dir" value="${basedir}/../lib" />
+
+	<!-- path element used by EMMA taskdef below: -->
+	<path id="emma.lib">
+		<pathelement location="${emma.dir}/emma.jar" />
+		<pathelement location="${emma.dir}/emma_ant.jar" />
+	</path>
+	<path id="junit.lib">
+		<pathelement location="${emma.dir}/ant-junit4-0.0.3-standalone.jar" />
+	</path>
+
+	<!-- this loads <emma> and <emmajava> custom tasks: -->
+	<taskdef resource="emma_ant.properties" classpathref="emma.lib" />
+	
+
+	<target name="clean" description="resets this demo project to a clean state">
+		<delete dir="${out.dir}" />
+		<delete dir="${coverage.dir}" />
+	</target>
+	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+
+	<target name="init">
+		<mkdir dir="${out.dir}" />
+		<path id="run.classpath">
+			<pathelement location="${out.dir}" />
+		</path>
+	</target>
+
+	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+
+	<target name="compile" depends="init" description="compiles the example source code">
+		<!-- compile using javac [debug="on" ensures rich(er) emma reporting]: -->
+		
+		<javac debug="on" srcdir="${src.dir}" destdir="${out.dir}" />
+	</target>
+	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+
+	<!-- if <emmajava> is disabled, it acts as a simple pass-through to
+		       the original ANT <java> task: this is convenient, because it avoids
+		       having to branch the build execution depending on whether you want
+		       code coverage or not. Note that <emmajava> inherits all of <java>'s
+		       attributes and nested elements.
+		  -->
+
+	<!--target name="run" depends="emma,init, compile" description="runs the examples">
+		<emmajava enabled="${emma.enabled}" libclasspathref="emma.lib" fullmetadata="yes" filter="${emma.filter}" sourcepath="${src.dir}" classname="cs445assign1.TestCreature" classpathref="run.classpath">
+			<! regular <java> options are still available: 
+			<arg value="somearg" />
+
+			<! <emmajava> option extensions [see the reference manual for
+		           complete details]: 
+			<txt outfile="${coverage.dir}/coverage.txt" />
+			<html outfile="${coverage.dir}/coverage.html" />
+		</emmajava>
+	</target-->
+
+	<target name="emma" description="turns on EMMA instrumentation/reporting">
+		<property name="emma.enabled" value="true" />
+		<!-- EMMA instr class output directory: -->
+		<property name="out.instr.dir" value="${basedir}/outinstr" />
+		<mkdir dir="${out.instr.dir}" />
+	</target>
+
+	<target name="run" depends="init, compile" description="runs the examples">
+		<emma enabled="${emma.enabled}">
+			<instr instrpathref="run.classpath" destdir="${out.instr.dir}" metadatafile="${coverage.dir}/metadata.emma" merge="true" />
+		</emma>
+
+
+		<java classname="ThingTest" fork="true" >
+			<classpath>
+	       <pathelement location="${out.instr.dir}" />
+				<path refid="run.classpath" />
+				<path refid="emma.lib" />
+			</classpath>
+			<jvmarg value="-Demma.coverage.out.file=${coverage.dir}/coverage.emma" />
+			<jvmarg value="-Demma.coverage.out.merge=true" />
+	    </java>
+
+		<emma enabled="${emma.enabled}">
+			<report sourcepath="${src.dir}">
+				<fileset dir="${coverage.dir}">
+					<include name="*.emma" />
+				</fileset>
+
+				<txt outfile="${coverage.dir}/coverage.txt" />
+				<html outfile="${coverage.dir}/coverage.html" />
+			</report>
+		</emma>
+	</target>
+
+
+	  <target name="junit">
+
+		<junit printsummary="yes" haltonfailure="no">
+
+			<classpath refid="test.path" />
+			<classpath location="${build.dir}" />
+							
+			<!-- Make sure these two libraries are included -->
+			<classpath location="${emma.dir}/junit.jar" />
+			<!--lasspath location="lib/hamcrest-core-1.3.jar" /-->
+				
+			<test name="cs445assign1.ThingTest" 
+				haltonfailure="no" todir="${report.dir}" outfile="result">
+				<formatter type="plain" />
+				<formatter type="xml" />
+			</test>
+
+		</junit>
+	  </target>
+
+
+
+</project>
